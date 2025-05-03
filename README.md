@@ -1,5 +1,6 @@
 
 # qachatbot
+[Screen Recording - Made with FlexClip (2).webm](https://github.com/user-attachments/assets/ae3d0782-cad1-42d8-9414-494a4b330c54)
 
 # 📄 Document QA ChatBot
 
