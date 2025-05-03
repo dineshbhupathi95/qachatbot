@@ -18,4 +18,4 @@ pip install -r requirements.txt
 ###3. Run the application
 streamlit run main.py
 
-![Screenshot](assets/application.png)
+![App Screenshot](assets/application.png)
