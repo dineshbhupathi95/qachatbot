@@ -29,6 +29,7 @@ def setup_bot():
         top_p=0.85,
         repetition_penalty=1.2,
         truncation=True,
+        do_sample=False,
         device=-1
     )
 
@@ -39,7 +40,7 @@ def setup_bot():
         llm=llm,
         retriever=retriever,
         chain_type="stuff",  # Using map_reduce instead of stuff for more structured responses
-        return_source_documents=False
+        return_source_documents=True
     )
 
     return qa_chain
@@ -49,6 +50,18 @@ qa_chain = setup_bot()
 query = st.text_input("Ask a question about the program manual:")
 if query:
     with st.spinner("Thinking..."):
-        result = qa_chain.run(query)
+        prompt = f"""
+        You are a knowledgeable assistant trained on the User Manual. Summarize the relevant sections of the manual to clearly and accurately answer the following question.
+
+        Include key steps, and module names. Write as if explaining to a new user.
+
+        Question: {query}
+        """
+
+        result = qa_chain(prompt)
         st.write("### 🤖 Answer:")
-        st.write(result)
+        st.write(result["result"])
+        with st.expander("🗂️ Sources"):
+            for doc in result['source_documents']:
+                st.markdown(f"**Source Page:** {doc.metadata.get('page', '?')}")
+                st.text(doc.page_content[:500])
