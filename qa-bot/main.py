@@ -1,4 +1,5 @@
 import streamlit as st
+import tempfile
 from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFacePipeline
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
@@ -7,19 +8,27 @@ from vector_store import create_vector_store
 
 st.title("📄 Document QA Bot (Program Manual Assistant)")
 
-@st.cache_resource
-def setup_bot():
-    # Load PDF and create retriever
-    docs = load_and_split_pdf("docs/UserManual.pdf")
-    vectorstore = create_vector_store(docs)
-    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})  # Using 3 for most relevant docs
+# Upload PDF
+uploaded_file = st.file_uploader("Upload a PDF to ask questions from:", type="pdf")
 
-    # Load tokenizer and model from Hugging Face
+@st.cache_resource
+def setup_bot(file=None):
+    # Handle uploaded file or fallback to default
+    if file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+            tmp_file.write(file.read())
+            tmp_file_path = tmp_file.name
+        docs = load_and_split_pdf(tmp_file_path)
+    else:
+        docs = load_and_split_pdf("docs/UserManual.pdf")
+
+    vectorstore = create_vector_store(docs)
+    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+
     model_id = "google/flan-t5-large"
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
 
-    # Create the pipeline with adjusted settings for concise responses
     pipe = pipeline(
         "text2text-generation",
         model=model,
@@ -35,25 +44,24 @@ def setup_bot():
 
     llm = HuggingFacePipeline(pipeline=pipe)
 
-    # Build the RetrievalQA chain using the map_reduce method for more coherent answers
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,
-        chain_type="stuff",  # Using map_reduce instead of stuff for more structured responses
+        chain_type="stuff",
         return_source_documents=True
     )
 
     return qa_chain
 
-qa_chain = setup_bot()
+qa_chain = setup_bot(uploaded_file)
 
-query = st.text_input("Ask a question about the program manual:")
+query = st.text_input("Ask a question about the document:")
 if query:
     with st.spinner("Thinking..."):
         prompt = f"""
-        You are a knowledgeable assistant trained on the User Manual. Summarize the relevant sections of the manual to clearly and accurately answer the following question.
+        You are a knowledgeable assistant trained on the uploaded document. Summarize the relevant sections clearly and accurately to answer the question below.
 
-        Include key steps, and module names. Write as if explaining to a new user.
+        Include key steps, module names, or concepts. Answer as if explaining to a new user.
 
         Question: {query}
         """
@@ -61,7 +69,8 @@ if query:
         result = qa_chain(prompt)
         st.write("### 🤖 Answer:")
         st.write(result["result"])
-        with st.expander("🗂️ Sources"):
+
+        with st.expander("🗂️ Sources", expanded=True):
             for doc in result['source_documents']:
                 st.markdown(f"**Source Page:** {doc.metadata.get('page', '?')}")
                 st.text(doc.page_content[:500])
