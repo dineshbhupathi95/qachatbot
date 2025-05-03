@@ -18,4 +18,4 @@ pip install -r requirements.txt
 ###3. Run the application
 streamlit run main.py
 
-![App Screenshot](assets/application.png)
+![App Screenshot](qa-bot/assets/application.png)
