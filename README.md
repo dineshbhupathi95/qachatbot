@@ -21,4 +21,3 @@ streamlit run main.py
 
 ![Alt text](https://github.com/dineshbhupathi95/qachatbot/blob/main/assets/application.png)
 
-[Screen Recording - Made with FlexClip (2).webm](https://github.com/user-attachments/assets/dc28ad44-9b02-452d-9969-728d779d131c)
