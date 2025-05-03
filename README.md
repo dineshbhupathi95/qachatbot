@@ -1,5 +1,4 @@
 
-https://github.com/user-attachments/assets/c41ad5dd-fed5-42a6-aa33-a0d27800b0db
 # qachatbot
 
 # 📄 Document QA ChatBot
@@ -21,4 +20,4 @@ pip install -r requirements.txt
 streamlit run main.py
 
 ![Alt text](https://github.com/dineshbhupathi95/qachatbot/blob/main/assets/application.png)
-<img width="1440" alt="Screenshot 2025-05-03 at 9 39 21 AM" src="https://github.com/user-attachments/assets/3ddb0664-d128-41cc-a288-9834e2a14a2f" />
+
